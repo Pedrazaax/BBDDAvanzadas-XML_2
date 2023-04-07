@@ -14,14 +14,18 @@ c.execute('''
 ''')
 
 c.execute('''
-    CREATE TABLE IF NOT EXISTS inversionesFondos (
+    CREATE TABLE IF NOT EXISTS cartera (
         descripcion TEXT,
-        divisa TEXT
+        importe TEXT,
+        inversionPorcActual,
+        inversionPorcAnterior,
+        importeValorAct,
+        importeValorAnt
     )
 ''')
 
 # Lista con los nombres de los archivos XML
-xml_files = ['semestre1_2019.XML']
+xml_files = ['semestre2_2020.XML']
 
 # Define un espacio de nombres para los elementos XBRL
 ns = {'xbrl': 'http://www.xbrl.org/2003/instance'}
@@ -53,14 +57,26 @@ for xml_file in xml_files:
     
     elementos = root.findall('.//iic-com:InversionesFinancierasRVCotizada', ns)
     for elemento in elementos:
+        print("   ")
         nombreFondo = elemento.find('.//iic-com:InversionesFinancierasDescripcion', ns)
         valor = nombreFondo.text
-        valorFondo = elemento.find('.//iic-com:InversionesFinancierasValor', ns)
-        valorFondotext= valorFondo.text
-        porcentajeFondo = elemento.find('.//iic-com:InversionesFinancierasPorcentaje', ns)
-        porcentajeFondoText = porcentajeFondo.text
-        print(porcentajeFondoText)
+        elementosImporte = elemento.findall('.//iic-com:InversionesFinancierasImporte', ns)
+        for elementoImporte in elementosImporte:
+            elementoValor = elementoImporte.findall('.//iic-com:InversionesFinancierasValor', ns)
+            elementoPorcentaje = elementoImporte.findall('.//iic-com:InversionesFinancierasPorcentaje', ns)
+            for importePorcentaje in elementoPorcentaje:
+                    #valorFondo = elementoImporte.find('.//iic-com:InversionesFinancierasValor', ns)
+                    #valorFondotext= valorFondo.text
+                    porcentajeFondo = elementoImporte.find('.//iic-com:InversionesFinancierasPorcentaje', ns)
+                    porcentajeFondoText = porcentajeFondo.text
+                    print(porcentajeFondoText)
+            for importeValor in elementoValor:
+                    valorFondo = elementoImporte.find('.//iic-com:InversionesFinancierasValor', ns)
+                    valorFondotext= valorFondo.text
+                    print(valorFondotext)
 
+
+                   
 
 
 conn.commit()
