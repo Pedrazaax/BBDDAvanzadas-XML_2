@@ -16,11 +16,10 @@ c.execute('''
 c.execute('''
     CREATE TABLE IF NOT EXISTS cartera (
         descripcion TEXT,
-        importe TEXT,
-        inversionPorcActual,
-        inversionPorcAnterior,
-        importeValorAct,
-        importeValorAnt
+        inversionPorcActual TEXT,
+        inversionPorcAnterior TEXT,
+        importeValorAct TEXT,
+        importeValorAnt TEXT
     )
 ''')
 
@@ -57,27 +56,32 @@ for xml_file in xml_files:
     
     elementos = root.findall('.//iic-com:InversionesFinancierasRVCotizada', ns)
     for elemento in elementos:
-        print("   ")
         nombreFondo = elemento.find('.//iic-com:InversionesFinancierasDescripcion', ns)
         valor = nombreFondo.text
+        c.execute(f"INSERT INTO cartera (descripcion) VALUES ('{valor}')")
         elementosImporte = elemento.findall('.//iic-com:InversionesFinancierasImporte', ns)
         for elementoImporte in elementosImporte:
             elementoValor = elementoImporte.findall('.//iic-com:InversionesFinancierasValor', ns)
             elementoPorcentaje = elementoImporte.findall('.//iic-com:InversionesFinancierasPorcentaje', ns)
+            repe = 1
             for importePorcentaje in elementoPorcentaje:
-                    #valorFondo = elementoImporte.find('.//iic-com:InversionesFinancierasValor', ns)
-                    #valorFondotext= valorFondo.text
                     porcentajeFondo = elementoImporte.find('.//iic-com:InversionesFinancierasPorcentaje', ns)
                     porcentajeFondoText = porcentajeFondo.text
-                    print(porcentajeFondoText)
+                    if repe == 1:
+                         c.execute(f"UPDATE cartera SET inversionPorcActual ='{porcentajeFondoText}' WHERE descripcion = '{valor}'")
+                    if repe == 2:
+                         c.execute(f"UPDATE cartera SET inversionPorcAnterior ='{porcentajeFondoText}' WHERE descripcion = '{valor}'")
+                         repe = 1
+                    repe+1
+            repe = 1
             for importeValor in elementoValor:
                     valorFondo = elementoImporte.find('.//iic-com:InversionesFinancierasValor', ns)
                     valorFondotext= valorFondo.text
-                    print(valorFondotext)
-
-
-                   
-
+                    if repe == 1:
+                         c.execute(f"UPDATE cartera SET importeValorAct ='{valorFondotext}' WHERE descripcion = '{valor}'")
+                    if repe == 2:
+                         c.execute(f"UPDATE cartera SET importeValorAnt ='{valorFondotext}' WHERE descripcion = '{valor}'")
+                         repe = 1                   
 
 conn.commit()
 conn.close()
