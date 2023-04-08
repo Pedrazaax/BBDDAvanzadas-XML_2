@@ -15,6 +15,7 @@ c.execute('''
 
 c.execute('''
     CREATE TABLE IF NOT EXISTS cartera (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         descripcion TEXT,
         inversionPorcActual TEXT,
         inversionPorcAnterior TEXT,
@@ -59,7 +60,7 @@ for xml_file in xml_files:
         nombreFondo = elemento.find('.//iic-com:InversionesFinancierasDescripcion', ns)
         valor = nombreFondo.text
         c.execute(f"INSERT INTO cartera (descripcion) VALUES ('{valor}')")
-        print(" ")
+        idGenerado = c.execute('SELECT last_insert_rowid()').fetchone()[0]  #Coge el id creado en el insert anterior ya que es autoincremental la primary key
         elementosImporte = elemento.findall('.//iic-com:InversionesFinancierasImporte', ns)
         for elementoImporte in elementosImporte:
             
@@ -71,17 +72,17 @@ for xml_file in xml_files:
                 if decimals == "0": 
                     if actualOAnt == "FIM_S22020_II0004840_ia":
                         #valorActual
-                        c.execute(f"UPDATE cartera SET importeValorAct ='{e.text}' WHERE descripcion = '{valor}'")
+                        c.execute(f"UPDATE cartera SET importeValorAct ='{e.text}' WHERE id = '{idGenerado}'")
                     else:
                         #valorAnterior
-                        c.execute(f"UPDATE cartera SET importeValorAnt ='{e.text}' WHERE descripcion = '{valor}'")
+                        c.execute(f"UPDATE cartera SET importeValorAnt ='{e.text}' WHERE id = '{idGenerado}'")
                 else:
                     if actualOAnt == "FIM_S22020_II0004840_ia":
                         #porcentajeActual
-                        c.execute(f"UPDATE cartera SET inversionPorcActual ='{e.text}' WHERE descripcion = '{valor}'")
+                        c.execute(f"UPDATE cartera SET inversionPorcActual ='{e.text}' WHERE id = '{idGenerado}'")
                     else:
                         #porcentajeAnterior
-                        c.execute(f"UPDATE cartera SET inversionPorcAnterior ='{e.text}' WHERE descripcion = '{valor}'")
+                        c.execute(f"UPDATE cartera SET inversionPorcAnterior ='{e.text}' WHERE id = '{idGenerado}'")
 
 print("holaaaaaaa")
 conn.commit()
