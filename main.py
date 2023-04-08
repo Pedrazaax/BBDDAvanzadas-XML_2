@@ -23,13 +23,14 @@ c.execute('''
         inversionPorcAnterior TEXT,
         importeValorAct TEXT,
         importeValorAnt TEXT,
+        periodo TEXT,
         registro INTEGER,
         FOREIGN KEY (registro) REFERENCES fondos(registro)
     )
 ''')
 
 # Lista con los nombres de los archivos XML
-xml_files = ['semestre2_2020.XML']
+xml_files = ['semestre2_2020.XML','semestre1_2020.XML','semestre1_2019.XML','semestre2_2019.XML']
 
 # Define un espacio de nombres para los elementos XBRL
 ns = {'xbrl': 'http://www.xbrl.org/2003/instance'}
@@ -57,8 +58,8 @@ for xml_file in xml_files:
     # Cogemos el valor del correo
     correo = root.find('.//dgi-est-gen:CommunicationValue', dgi)
     valorCorreo= correo.text
+    c.execute('INSERT OR IGNORE INTO fondos VALUES (?,?,?,?)', (valorRegistro,valor,valorDir,valorCorreo))
 
-    c.execute('INSERT INTO fondos VALUES (?,?,?,?)', (valorRegistro,valor,valorDir,valorCorreo))
     
 
 #Sacar cartera inversion
@@ -71,7 +72,8 @@ for xml_file in xml_files:
     for elemento in elementos:
         nombreFondo = elemento.find('.//iic-com:InversionesFinancierasDescripcion', ns)
         valor = nombreFondo.text
-        c.execute("INSERT INTO cartera (descripcion, registro) VALUES (?, ?)", (valor, valorRegistro))
+        periodo = xml_file.split(".")[0] +""
+        c.execute("INSERT INTO cartera (descripcion, registro, periodo) VALUES (?, ?, ?)", (valor, valorRegistro, periodo))
         idGenerado = c.execute('SELECT last_insert_rowid()').fetchone()[0]  #Coge el id creado en el insert anterior ya que es autoincremental la primary key
         elementosImporte = elemento.findall('.//iic-com:InversionesFinancierasImporte', ns)
         
@@ -79,17 +81,17 @@ for xml_file in xml_files:
             actualOAnt =elementoImporte.attrib.get('contextRef')
             for e in elementoImporte:
                 decimals = e.attrib.get('decimals')
-                actualOAnt =e.attrib.get('contextRef')
+                actualOAnt = e.attrib.get('contextRef').split("_")[3]
 
                 if decimals == "0": 
-                    if actualOAnt == "FIM_S22020_II0004840_ia":
+                    if actualOAnt == "ia":
                         #valorActual
                         c.execute(f"UPDATE cartera SET importeValorAct ='{e.text}' WHERE id = '{idGenerado}'")
                     else:
                         #valorAnterior
                         c.execute(f"UPDATE cartera SET importeValorAnt ='{e.text}' WHERE id = '{idGenerado}'")
                 else:
-                    if actualOAnt == "FIM_S22020_II0004840_ia":
+                    if actualOAnt == "ia":
                         #porcentajeActual
                         c.execute(f"UPDATE cartera SET inversionPorcActual ='{e.text}' WHERE id = '{idGenerado}'")
                     else:
