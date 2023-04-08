@@ -30,7 +30,7 @@ c.execute('''
 ''')
 
 # Lista con los nombres de los archivos XML
-xml_files = ['semestre2_2020.XML','semestre1_2020.XML','semestre1_2019.XML','semestre2_2019.XML']
+xml_files = ['semestre2_2020.XML','semestre1_2020.XML','semestre1_2019.XML','semestre2_2019.XML','semestre1_2023.XML','semestre2_2023.XML']
 
 # Define un espacio de nombres para los elementos XBRL
 ns = {'xbrl': 'http://www.xbrl.org/2003/instance'}
