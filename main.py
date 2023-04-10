@@ -29,7 +29,6 @@ c.execute('''
     )
 ''')
 
-# Lista con los nombres de los archivos XML
 xml_files = ['semestre2_2020.XML','semestre1_2020.XML','semestre1_2019.XML','semestre2_2019.XML','semestre1_2023.XML','semestre2_2023.XML']
 
 # Define un espacio de nombres para los elementos XBRL
@@ -72,6 +71,9 @@ for xml_file in xml_files:
     for elemento in elementos:
         nombreFondo = elemento.find('.//iic-com:InversionesFinancierasDescripcion', ns)
         valor = nombreFondo.text
+        # Busca el primer elemento con la etiqueta "iic-com:RegistroCNMV" y extrae su valor
+        registro = root.find('.//iic-com:RegistroCNMV', ns1)
+        valorRegistro= int(registro.text)
         periodo = xml_file.split(".")[0] +""
         c.execute("INSERT INTO cartera (descripcion, registro, periodo) VALUES (?, ?, ?)", (valor, valorRegistro, periodo))
         idGenerado = c.execute('SELECT last_insert_rowid()').fetchone()[0]  #Coge el id creado en el insert anterior ya que es autoincremental la primary key
